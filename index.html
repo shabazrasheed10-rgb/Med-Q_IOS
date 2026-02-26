@@ -4,52 +4,60 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://unpkg.com/lucide@latest"></script>
-  <title>Med-Q | Pro</title>
+  <title>Med-Q | Block 2</title>
   <style>
     :root {
       --bg-color: #0c0d0e; 
       --card-bg: rgba(26, 28, 30, 0.7); 
+      --header-bg: rgba(22, 24, 26, 0.85);
+      --accent-hdsf: #f0cf6a;
       --accent-bbb: #38bdf8;
+      --text-main: #f1f5f9;
       --text-dim: #94a3b8;
       --border-color: rgba(255, 255, 255, 0.08);
     }
-    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: #fff; margin: 0; padding: 15px; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
     
-    /* Loading Screen to prevent flickering */
-    #loading-screen {
-      position: fixed; inset: 0; background: var(--bg-color); 
-      display: flex; justify-content: center; align-items: center; z-index: 20000;
-    }
-
+    #loading-screen { position: fixed; inset: 0; background: var(--bg-color); display: flex; justify-content: center; align-items: center; z-index: 20000; }
     #auth-overlay { position: fixed; inset: 0; background: var(--bg-color); z-index: 10000; display: none; justify-content: center; align-items: center; }
-    .system-card { background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(20px); border: 1px solid var(--border-color); padding: 30px; border-radius: 24px; width: 90%; max-width: 380px; text-align: center; }
     
-    input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px; border: 1px solid var(--border-color); background: #000; color: #fff; outline: none; }
-    button { width: 100%; padding: 12px; border-radius: 12px; border: none; background: var(--accent-bbb); font-weight: bold; cursor: pointer; margin-top: 10px; }
+    .system-card { background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(25px); border: 1px solid var(--border-color); padding: 30px; border-radius: 28px; width: 95%; max-width: 400px; text-align: center; }
+    .system-card input { width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); padding: 14px; border-radius: 14px; color: white; margin-bottom: 12px; outline: none; }
+    .system-card button { width: 100%; padding: 14px; border-radius: 14px; border: none; background: var(--accent-bbb); color: #000; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
     .secondary-btn { background: transparent !important; color: var(--accent-bbb) !important; border: 1px solid var(--accent-bbb) !important; }
-    
-    #app-container { display: none; flex-direction: column; width: 100%; align-items: center; }
-    .view { display: none; width: 100%; max-width: 800px; }
+
+    #app-container { display: none; flex-direction: column; width: 100%; max-width: 900px; }
+    .view { display: none; width: 100%; }
     .view.active { display: block; }
 
+    .main-header { background: var(--header-bg); padding: 16px; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border-color); }
+    .year-nav { display: flex; gap: 10px; margin-bottom: 20px; }
+    .year-chip { padding: 8px 16px; background: #16181a; border-radius: 8px; cursor: pointer; color: var(--text-dim); }
+    .year-chip.active { color: var(--accent-bbb); border: 1px solid var(--accent-bbb); }
+
+    .category-title { border-left: 3px solid var(--accent-hdsf); padding-left: 10px; margin: 20px 0; }
+    .subject-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+    .subject-card { background: var(--card-bg); padding: 15px; border-radius: 15px; border: 1px solid var(--border-color); }
+    .mcq-link { display: flex; justify-content: space-between; padding: 10px 0; color: var(--text-dim); cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .mcq-link.locked { opacity: 0.3; pointer-events: none; }
-    .status-badge { padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; margin: 15px 0; display: inline-block; }
+    .badge { font-size: 0.7rem; background: #26292b; padding: 2px 8px; border-radius: 5px; color: var(--accent-hdsf); }
+
+    .dynamic-island-wrapper { position: fixed; bottom: 30px; display: flex; justify-content: center; width: 100%; z-index: 999; pointer-events: none; }
+    .dynamic-island { pointer-events: auto; background: rgba(28, 30, 32, 0.9); padding: 10px 25px; border-radius: 40px; display: flex; gap: 30px; border: 1px solid var(--border-color); }
+    .island-item { color: var(--text-dim); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    .island-item.active { color: var(--accent-bbb); }
+    .status-badge { padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; margin-bottom: 10px; display: inline-block; }
     .status-active { background: rgba(74, 222, 128, 0.2); color: #4ade80; }
     .status-inactive { background: rgba(248, 113, 113, 0.2); color: #f87171; }
-
-    .dynamic-island-wrapper { position: fixed; bottom: 30px; left: 0; right: 0; display: flex; justify-content: center; }
-    .dynamic-island { background: #1c1e20; padding: 10px 25px; border-radius: 40px; display: flex; gap: 30px; border: 1px solid var(--border-color); }
-    .island-item { color: var(--text-dim); cursor: pointer; }
-    .island-item.active { color: var(--accent-bbb); }
   </style>
 </head>
 <body>
 
-  <div id="loading-screen"><h3>Loading Med-Q...</h3></div>
+  <div id="loading-screen"><h3>Med-Q Loading...</h3></div>
 
   <div id="auth-overlay">
     <div class="system-card">
-      <h2>Welcome</h2>
+      <h2>Med-Q Login</h2>
       <input type="email" id="email" placeholder="Email">
       <input type="password" id="password" placeholder="Password">
       <button onclick="handleAuth()">Sign In</button>
@@ -59,32 +67,56 @@
 
   <div id="app-container">
     <div id="home-view" class="view active">
-      <div class="system-card" style="max-width: 100%; margin-bottom: 20px;">
-        <h3>Course Materials</h3>
-        <div class="mcq-link locked" onclick="location.href='Anatomy.html'">Anatomy Theory</div>
-        <div class="mcq-link locked" onclick="location.href='Physiology.html'">Physiology Theory</div>
+      <header class="main-header"><h3>Final & End-Rotation</h3><p>Block 2 • Stage 1</p></header>
+      
+      <div class="year-nav">
+        <div class="year-chip active" onclick="showYear('2022', this)">2022-2025</div>
+        <div class="year-chip" onclick="showYear('2026', this)">2025-2026</div>
+      </div>
+
+      <div id="content-2022" class="year-content">
+        <h3 class="category-title" style="color:var(--accent-hdsf)">HDSF</h3>
+        <div class="subject-grid">
+          <div class="subject-card"><h1>Anatomy 🦴</h1><span class="mcq-link locked" onclick="location.href='Anatomy.html'">Theory <span class="badge">129 MCQs</span></span></div>
+          <div class="subject-card"><h1>Microbiology 🦠</h1><span class="mcq-link locked" onclick="location.href='Microbiology.html'">Theory <span class="badge">100 MCQs</span></span><span class="mcq-link locked" onclick="location.href='Microbiology labs.html'">Practical <span class="badge">35 Qs</span></span></div>
+          <div class="subject-card"><h1>Physiology 🫀</h1><span class="mcq-link locked" onclick="location.href='Physiology.html'">Theory <span class="badge">147 MCQs</span></span></div>
+          <div class="subject-card"><h1>Genetics 🧬</h1><span class="mcq-link locked" onclick="location.href='Genetics.html'">Theory <span class="badge">56 MCQs</span></span></div>
+          <div class="subject-card"><h1>Molecular biology 🧬</h1><span class="mcq-link locked" onclick="location.href='Molecular biology.html'">Theory <span class="badge">63 MCQs</span></span></div>
+          <div class="subject-card"><h1>Cell biology 🔬</h1><span class="mcq-link locked" onclick="location.href='Cell biology.html'">Theory <span class="badge">63 MCQs</span></span></div>
+          <div class="subject-card"><h1>Histology 🫁</h1><span class="mcq-link locked" onclick="location.href='Histology.html'">Theory <span class="badge">38 MCQs</span></span></div>
+          <div class="subject-card"><h1>Embryology 👶</h1><span class="mcq-link locked" onclick="location.href='Embryology.html'">Theory <span class="badge">25 MCQs</span></span></div>
+        </div>
+      </div>
+
+      <div id="content-2026" class="year-content" style="display:none">
+        <h3 class="category-title" style="color:var(--accent-bbb)">BBB</h3>
+        <div class="subject-grid">
+          <div class="subject-card"><h1>Biochemistry 🧪</h1><span class="mcq-link locked">Theory <span class="badge">0 MCQs</span></span></div>
+          <div class="subject-card"><h1>Biophysics ⚛️</h1><span class="mcq-link locked">Theory <span class="badge">0 MCQs</span></span></div>
+          <div class="subject-card"><h1>Emergency Care ⚕️</h1><span class="mcq-link locked">Theory <span class="badge">0 MCQs</span></span></div>
+        </div>
       </div>
     </div>
 
     <div id="account-view" class="view">
-      <div class="system-card" style="margin: 40px auto;">
-        <h1>Profile</h1>
-        <p id="user-display-email" style="color:var(--text-dim)"></p>
-        <div id="act-status" class="status-badge status-inactive">Inactive</div>
-        
-        <div id="activation-area">
-          <input type="text" id="activation-key" placeholder="Code">
-          <button onclick="activateAccount()">Activate Now</button>
+        <div class="system-card" style="margin: 50px auto;">
+          <h1>My Profile</h1>
+          <p id="user-display-email" style="color:var(--text-dim)"></p>
+          <div id="act-status" class="status-badge status-inactive">Inactive</div>
+          
+          <div id="activation-area">
+            <input type="text" id="activation-key" placeholder="Activation Code">
+            <button onclick="activateAccount()">Verify & Unlock</button>
+          </div>
+          
+          <button class="secondary-btn" onclick="handleSignOut()" style="color:#f87171!important; border-color:#f87171!important;">Sign Out</button>
         </div>
-
-        <button class="secondary-btn" onclick="handleSignOut()" style="color:#f87171!important; border-color:#f87171!important;">Sign Out</button>
-      </div>
     </div>
 
-    <div class="dynamic-island-wrapper">
+    <div class="dynamic-island-wrapper" id="island-wrap">
       <nav class="dynamic-island">
-        <div class="island-item active" id="nav-home" onclick="switchView('home')">Home</div>
-        <div class="island-item" id="nav-account" onclick="switchView('account')">Profile</div>
+        <div class="island-item active" id="nav-home" onclick="switchView('home')"><i data-lucide="home"></i> Home</div>
+        <div class="island-item" id="nav-account" onclick="switchView('account')"><i data-lucide="user"></i> Profile</div>
       </nav>
     </div>
   </div>
@@ -107,50 +139,48 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
 
-  // --- AUTH OBSERVER (The Brain of the App) ---
   onAuthStateChanged(auth, async (user) => {
-    const loading = document.getElementById('loading-screen');
-    const authUI = document.getElementById('auth-overlay');
-    const mainUI = document.getElementById('app-container');
+    const loader = document.getElementById('loading-screen');
+    const authBox = document.getElementById('auth-overlay');
+    const appBox = document.getElementById('app-container');
 
     if (user) {
       document.getElementById('user-display-email').innerText = user.email;
-      
-      // Fetch user data from Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists() && userDoc.data().isPremium) {
-        unlockContent();
-      }
-
-      authUI.style.display = 'none';
-      mainUI.style.display = 'flex';
+      if (userDoc.exists() && userDoc.data().isPremium) unlockContent();
+      authBox.style.display = 'none';
+      appBox.style.display = 'flex';
     } else {
-      authUI.style.display = 'flex';
-      mainUI.style.display = 'none';
+      authBox.style.display = 'flex';
+      appBox.style.display = 'none';
     }
-    loading.style.display = 'none'; // Hide loading once we know user state
+    loader.style.display = 'none';
+    lucide.createIcons();
   });
 
-  window.handleAuth = async () => {
-    try { await signInWithEmailAndPassword(auth, email.value, password.value); } 
-    catch (e) { alert(e.message); }
+  window.handleRegister = async () => {
+    const e = document.getElementById('email').value;
+    const p = document.getElementById('password').value;
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, e, p);
+      await setDoc(doc(db, "users", cred.user.uid), { isPremium: false, email: e });
+    } catch (err) { alert(err.message); }
   };
 
-  window.handleRegister = async () => {
-    try {
-      const cred = await createUserWithEmailAndPassword(auth, email.value, password.value);
-      await setDoc(doc(db, "users", cred.user.uid), { isPremium: false, email: email.value });
-    } catch (e) { alert(e.message); }
+  window.handleAuth = async () => {
+    const e = document.getElementById('email').value;
+    const p = document.getElementById('password').value;
+    try { await signInWithEmailAndPassword(auth, e, p); } catch (err) { alert(err.message); }
   };
 
   window.handleSignOut = async () => {
-    try { await signOut(auth); location.reload(); } 
-    catch (e) { alert(e.message); }
+    await signOut(auth);
+    location.reload();
   };
 
   window.activateAccount = async () => {
     const key = document.getElementById('activation-key').value;
-    if (!key) return;
+    if (!key) return alert("Enter a code");
     try {
       const keyRef = doc(db, "license_keys", key);
       const snap = await getDoc(keyRef);
@@ -158,17 +188,24 @@
         await updateDoc(keyRef, { used: true, usedBy: auth.currentUser.uid });
         await setDoc(doc(db, "users", auth.currentUser.uid), { isPremium: true }, { merge: true });
         unlockContent();
-        alert("Success! Content unlocked.");
-      } else { alert("Invalid key"); }
-    } catch (e) { alert(e.message); }
+        alert("Account Activated!");
+      } else { alert("Invalid or used code"); }
+    } catch (err) { alert(err.message); }
   };
 
   function unlockContent() {
     document.getElementById('act-status').innerText = "Premium Active";
     document.getElementById('act-status').className = "status-badge status-active";
-    document.getElementById('activation-area').style.display = 'none'; // REMOVE BOX
+    document.getElementById('activation-area').style.display = 'none';
     document.querySelectorAll('.mcq-link').forEach(l => l.classList.remove('locked'));
   }
+
+  window.showYear = (year, el) => {
+    document.querySelectorAll('.year-content').forEach(c => c.style.display = 'none');
+    document.querySelectorAll('.year-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('content-' + year).style.display = 'block';
+    el.classList.add('active');
+  };
 
   window.switchView = (v) => {
     document.querySelectorAll('.view, .island-item').forEach(el => el.classList.remove('active'));
