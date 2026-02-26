@@ -4,75 +4,52 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://unpkg.com/lucide@latest"></script>
-  <title>Block 2 | Med-Q</title>
+  <title>Med-Q | Pro</title>
   <style>
     :root {
       --bg-color: #0c0d0e; 
       --card-bg: rgba(26, 28, 30, 0.7); 
-      --header-bg: rgba(22, 24, 26, 0.85);
-      --accent-hdsf: #f0cf6a;
       --accent-bbb: #38bdf8;
-      --text-main: #f1f5f9;
       --text-dim: #94a3b8;
       --border-color: rgba(255, 255, 255, 0.08);
     }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      margin: 0; padding: 15px;
-      display: flex; flex-direction: column; align-items: center;
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: #fff; margin: 0; padding: 15px; }
+    
+    /* Loading Screen to prevent flickering */
+    #loading-screen {
+      position: fixed; inset: 0; background: var(--bg-color); 
+      display: flex; justify-content: center; align-items: center; z-index: 20000;
     }
-    #auth-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: var(--bg-color); z-index: 10000;
-      display: flex; justify-content: center; align-items: center;
-    }
-    .system-card {
-      background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(25px);
-      border: 1px solid var(--border-color); padding: 40px 30px; border-radius: 28px;
-      width: 95%; max-width: 400px; text-align: center;
-    }
-    .system-card input {
-      width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color);
-      padding: 14px; border-radius: 14px; color: white; margin-bottom: 12px; outline: none;
-    }
-    .system-card button {
-      width: 100%; padding: 14px; border-radius: 14px; border: none;
-      background: var(--accent-bbb); color: #000; font-weight: bold; cursor: pointer; margin-bottom: 10px;
-    }
+
+    #auth-overlay { position: fixed; inset: 0; background: var(--bg-color); z-index: 10000; display: none; justify-content: center; align-items: center; }
+    .system-card { background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(20px); border: 1px solid var(--border-color); padding: 30px; border-radius: 24px; width: 90%; max-width: 380px; text-align: center; }
+    
+    input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px; border: 1px solid var(--border-color); background: #000; color: #fff; outline: none; }
+    button { width: 100%; padding: 12px; border-radius: 12px; border: none; background: var(--accent-bbb); font-weight: bold; cursor: pointer; margin-top: 10px; }
     .secondary-btn { background: transparent !important; color: var(--accent-bbb) !important; border: 1px solid var(--accent-bbb) !important; }
     
-    #app-container { display: none; flex-direction: column; width: 100%; max-width: 900px; }
-    .view { display: none; width: 100%; }
+    #app-container { display: none; flex-direction: column; width: 100%; align-items: center; }
+    .view { display: none; width: 100%; max-width: 800px; }
     .view.active { display: block; }
 
-    .main-header { background: var(--header-bg); padding: 16px; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border-color); }
-    .year-nav { display: flex; gap: 10px; margin-bottom: 20px; }
-    .year-chip { padding: 8px 16px; background: #16181a; border-radius: 8px; cursor: pointer; color: var(--text-dim); }
-    .year-chip.active { color: var(--accent-bbb); border: 1px solid var(--accent-bbb); }
-
-    .category-title { border-left: 3px solid var(--accent-hdsf); padding-left: 10px; margin: 20px 0; }
-    .subject-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-    .subject-card { background: var(--card-bg); padding: 15px; border-radius: 15px; border: 1px solid var(--border-color); }
-    .mcq-link { display: flex; justify-content: space-between; padding: 10px 0; color: var(--text-dim); cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .mcq-link.locked { opacity: 0.3; pointer-events: none; }
-    .badge { font-size: 0.7rem; background: #26292b; padding: 2px 8px; border-radius: 5px; color: var(--accent-hdsf); }
-
-    .dynamic-island-wrapper { position: fixed; bottom: 30px; display: none; justify-content: center; width: 100%; z-index: 999; }
-    .dynamic-island { background: rgba(28, 30, 32, 0.9); padding: 8px 20px; border-radius: 40px; display: flex; gap: 20px; border: 1px solid rgba(255,255,255,0.1); }
-    .island-item { color: #94a3b8; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-    .island-item.active { color: var(--accent-bbb); }
-    .status-badge { padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; margin-bottom: 10px; display: inline-block; }
+    .status-badge { padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; margin: 15px 0; display: inline-block; }
     .status-active { background: rgba(74, 222, 128, 0.2); color: #4ade80; }
     .status-inactive { background: rgba(248, 113, 113, 0.2); color: #f87171; }
+
+    .dynamic-island-wrapper { position: fixed; bottom: 30px; left: 0; right: 0; display: flex; justify-content: center; }
+    .dynamic-island { background: #1c1e20; padding: 10px 25px; border-radius: 40px; display: flex; gap: 30px; border: 1px solid var(--border-color); }
+    .island-item { color: var(--text-dim); cursor: pointer; }
+    .island-item.active { color: var(--accent-bbb); }
   </style>
 </head>
 <body>
 
+  <div id="loading-screen"><h3>Loading Med-Q...</h3></div>
+
   <div id="auth-overlay">
     <div class="system-card">
-      <h2>Med-Q Login</h2>
+      <h2>Welcome</h2>
       <input type="email" id="email" placeholder="Email">
       <input type="password" id="password" placeholder="Password">
       <button onclick="handleAuth()">Sign In</button>
@@ -82,45 +59,32 @@
 
   <div id="app-container">
     <div id="home-view" class="view active">
-      <header class="main-header"><h3>Final & End-Rotation</h3><p>Block 2 • Stage 1</p></header>
-      
-      <div class="year-nav">
-        <div class="year-chip active" onclick="showYear('2022', this)">2022-2025</div>
-        <div class="year-chip" onclick="showYear('2026', this)">2025-2026</div>
-      </div>
-
-      <div id="content-2022" class="year-content">
-        <h3 class="category-title" style="color:var(--accent-hdsf)">HDSF</h3>
-        <div class="subject-grid">
-          <div class="subject-card"><h1>Anatomy 🦴</h1><span class="mcq-link locked" onclick="location.href='Anatomy.html'">Theory <span class="badge">129 MCQs</span></span></div>
-          <div class="subject-card"><h1>Microbiology 🦠</h1><span class="mcq-link locked" onclick="location.href='Microbiology.html'">Theory <span class="badge">100 MCQs</span></span></div>
-          <div class="subject-card"><h1>Physiology 🫀</h1><span class="mcq-link locked" onclick="location.href='Physiology.html'">Theory <span class="badge">147 MCQs</span></span></div>
-        </div>
-      </div>
-
-      <div id="content-2026" class="year-content" style="display:none">
-        <h3 class="category-title" style="color:var(--accent-bbb)">BBB</h3>
-        <div class="subject-grid">
-          <div class="subject-card"><h1>Biochemistry 🧪</h1><span class="mcq-link locked">Theory <span class="badge">0 MCQs</span></span></div>
-        </div>
+      <div class="system-card" style="max-width: 100%; margin-bottom: 20px;">
+        <h3>Course Materials</h3>
+        <div class="mcq-link locked" onclick="location.href='Anatomy.html'">Anatomy Theory</div>
+        <div class="mcq-link locked" onclick="location.href='Physiology.html'">Physiology Theory</div>
       </div>
     </div>
 
     <div id="account-view" class="view">
-        <div class="system-card" style="margin: 50px auto;">
-          <h1>My Profile</h1>
-          <p id="user-display-email"></p>
-          <div id="act-status" class="status-badge status-inactive">Status: Not Activated</div>
-          <input type="text" id="activation-key" placeholder="Activation Code">
-          <button onclick="activateAccount()">Verify & Unlock</button>
-          <button class="secondary-btn" onclick="location.reload()">Sign Out</button>
+      <div class="system-card" style="margin: 40px auto;">
+        <h1>Profile</h1>
+        <p id="user-display-email" style="color:var(--text-dim)"></p>
+        <div id="act-status" class="status-badge status-inactive">Inactive</div>
+        
+        <div id="activation-area">
+          <input type="text" id="activation-key" placeholder="Code">
+          <button onclick="activateAccount()">Activate Now</button>
         </div>
+
+        <button class="secondary-btn" onclick="handleSignOut()" style="color:#f87171!important; border-color:#f87171!important;">Sign Out</button>
+      </div>
     </div>
 
-    <div class="dynamic-island-wrapper" id="island-wrap">
+    <div class="dynamic-island-wrapper">
       <nav class="dynamic-island">
-        <div class="island-item active" id="nav-home" onclick="switchView('home')"><i data-lucide="home"></i> Home</div>
-        <div class="island-item" id="nav-account" onclick="switchView('account')"><i data-lucide="user"></i> Profile</div>
+        <div class="island-item active" id="nav-home" onclick="switchView('home')">Home</div>
+        <div class="island-item" id="nav-account" onclick="switchView('account')">Profile</div>
       </nav>
     </div>
   </div>
@@ -128,7 +92,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDJeuVjPYeVFY1-2eeKC3a9ztCMmRn9nyA",
@@ -143,64 +107,68 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
 
-  window.handleRegister = async function() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    try {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      await setDoc(doc(db, "users", cred.user.uid), { isPremium: false, email: email });
-      alert("Account Created!");
-    } catch (e) { alert("Registration Error: " + e.message); }
-  };
-
-  window.handleAuth = async function() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (e) { alert("Login Error: " + e.message); }
-  };
-
+  // --- AUTH OBSERVER (The Brain of the App) ---
   onAuthStateChanged(auth, async (user) => {
+    const loading = document.getElementById('loading-screen');
+    const authUI = document.getElementById('auth-overlay');
+    const mainUI = document.getElementById('app-container');
+
     if (user) {
-      document.getElementById('auth-overlay').style.display = 'none';
-      document.getElementById('app-container').style.display = 'flex';
-      document.getElementById('island-wrap').style.display = 'flex';
       document.getElementById('user-display-email').innerText = user.email;
+      
+      // Fetch user data from Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists() && userDoc.data().isPremium) unlockContent();
-      lucide.createIcons();
+      if (userDoc.exists() && userDoc.data().isPremium) {
+        unlockContent();
+      }
+
+      authUI.style.display = 'none';
+      mainUI.style.display = 'flex';
+    } else {
+      authUI.style.display = 'flex';
+      mainUI.style.display = 'none';
     }
+    loading.style.display = 'none'; // Hide loading once we know user state
   });
 
-  window.activateAccount = async function() {
+  window.handleAuth = async () => {
+    try { await signInWithEmailAndPassword(auth, email.value, password.value); } 
+    catch (e) { alert(e.message); }
+  };
+
+  window.handleRegister = async () => {
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email.value, password.value);
+      await setDoc(doc(db, "users", cred.user.uid), { isPremium: false, email: email.value });
+    } catch (e) { alert(e.message); }
+  };
+
+  window.handleSignOut = async () => {
+    try { await signOut(auth); location.reload(); } 
+    catch (e) { alert(e.message); }
+  };
+
+  window.activateAccount = async () => {
     const key = document.getElementById('activation-key').value;
-    const user = auth.currentUser;
-    if (!key) return alert("Enter key");
+    if (!key) return;
     try {
       const keyRef = doc(db, "license_keys", key);
-      const keySnap = await getDoc(keyRef);
-      if (keySnap.exists() && !keySnap.data().used) {
-        await updateDoc(keyRef, { used: true, usedBy: user.uid });
-        await setDoc(doc(db, "users", user.uid), { isPremium: true }, { merge: true });
+      const snap = await getDoc(keyRef);
+      if (snap.exists() && !snap.data().used) {
+        await updateDoc(keyRef, { used: true, usedBy: auth.currentUser.uid });
+        await setDoc(doc(db, "users", auth.currentUser.uid), { isPremium: true }, { merge: true });
         unlockContent();
-        alert("Activated!");
-      } else { alert("Invalid/Used Code"); }
+        alert("Success! Content unlocked.");
+      } else { alert("Invalid key"); }
     } catch (e) { alert(e.message); }
   };
 
   function unlockContent() {
-    document.getElementById('act-status').innerText = "Status: Activated";
+    document.getElementById('act-status').innerText = "Premium Active";
     document.getElementById('act-status').className = "status-badge status-active";
+    document.getElementById('activation-area').style.display = 'none'; // REMOVE BOX
     document.querySelectorAll('.mcq-link').forEach(l => l.classList.remove('locked'));
   }
-
-  window.showYear = (year, el) => {
-    document.querySelectorAll('.year-content').forEach(c => c.style.display = 'none');
-    document.querySelectorAll('.year-chip').forEach(c => c.classList.remove('active'));
-    document.getElementById('content-' + year).style.display = 'block';
-    el.classList.add('active');
-  };
 
   window.switchView = (v) => {
     document.querySelectorAll('.view, .island-item').forEach(el => el.classList.remove('active'));
