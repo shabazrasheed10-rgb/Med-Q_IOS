@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://unpkg.com/lucide@latest"></script>
-  <title>Med-Q | Block 2</title>
+  <title>Med-Q | Device Locked</title>
   <style>
     :root {
       --bg-color: #0c0d0e; 
@@ -53,7 +53,7 @@
 </head>
 <body>
 
-  <div id="loading-screen"><h3>Med-Q Loading...</h3></div>
+  <div id="loading-screen"><h3>Securing Connection...</h3></div>
 
   <div id="auth-overlay">
     <div class="system-card">
@@ -139,6 +139,16 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
 
+  // --- DEVICE FINGERPRINTING ---
+  function getDeviceID() {
+    let id = localStorage.getItem('medq_device_id');
+    if (!id) {
+      id = 'dev-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now();
+      localStorage.setItem('medq_device_id', id);
+    }
+    return id;
+  }
+
   onAuthStateChanged(auth, async (user) => {
     const loader = document.getElementById('loading-screen');
     const authBox = document.getElementById('auth-overlay');
@@ -147,7 +157,18 @@
     if (user) {
       document.getElementById('user-display-email').innerText = user.email;
       const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists() && userDoc.data().isPremium) unlockContent();
+      
+      if (userDoc.exists() && userDoc.data().isPremium) {
+        const currentDevice = getDeviceID();
+        // SECURITY CHECK: Compare database Device ID with current browser
+        if (userDoc.data().lockedDevice && userDoc.data().lockedDevice !== currentDevice) {
+            alert("This account is locked to another device. Access denied.");
+            await signOut(auth);
+            location.reload();
+            return;
+        }
+        unlockContent();
+      }
       authBox.style.display = 'none';
       appBox.style.display = 'flex';
     } else {
@@ -180,15 +201,22 @@
 
   window.activateAccount = async () => {
     const key = document.getElementById('activation-key').value;
+    const currentDevice = getDeviceID();
     if (!key) return alert("Enter a code");
+    
     try {
       const keyRef = doc(db, "license_keys", key);
       const snap = await getDoc(keyRef);
       if (snap.exists() && !snap.data().used) {
         await updateDoc(keyRef, { used: true, usedBy: auth.currentUser.uid });
-        await setDoc(doc(db, "users", auth.currentUser.uid), { isPremium: true }, { merge: true });
+        // Save Premium status AND lock it to THIS device ID
+        await setDoc(doc(db, "users", auth.currentUser.uid), { 
+            isPremium: true, 
+            lockedDevice: currentDevice 
+        }, { merge: true });
+        
         unlockContent();
-        alert("Account Activated!");
+        alert("Activated & Locked to this device!");
       } else { alert("Invalid or used code"); }
     } catch (err) { alert(err.message); }
   };
